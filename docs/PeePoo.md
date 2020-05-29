@@ -4,6 +4,7 @@ Der „PeePoo“
 Was ist das?
 ------------
 
+<img src="Natürliches Habitat.jpg" width="50%">
 Unser Hund sucht viel Kontakt und ist reichlich aktiv. Noch hat er aber keine ausreichende Erziehung um selber rausgehen zu dürfen, mal abgesehen davon, dass das Grundstück zum aktuellen Zeitpunkt noch nicht hundesicher ist.
 
 Die junge Dame gibt natürlich Laut wenn sie mal raus muss, auch nachts kommt das noch vor (ist jetzt 9 Monate, ist also wirklich selten). Nur manchmal hat sie anstatt Druck einfach Kontaktbedürfnis. Das kann tagsüber oft noch gewährleistet werden, aber nachts ist das schon schwieriger. Da wir uns die Arbeit teilen, kann jeder in der Familie, der den Hund hört, mal eben raus – was man aber in der Nacht eigentlich nur machen will, wenn es Not tut. Ein Spielkamerad für nachts wollen wir alle nicht sein.
@@ -56,16 +57,18 @@ Dafür nehme man:
 
 Als erstes Projekt mit dem Digispark habe ich mir verkniffen, direkt etwas Batterie-optimiertes zu basteln. Das hebe ich mir für Folgeprojekte auf, so muss mal wieder in USB-Netzteil Dauerstrom geben.
 
+<img src="7-Segment-Display TM1637 Catalex.jpg" width="50%">
 Ich habe mich auf dem Steckbrett bzw. weil gerade keines frei war, mit fliegender Verkabelung an die Einzelkomponenten herangetastet. Nachdem das Programmieren gut klappte, habe ich mit dem TM1637 begonnen, weil es immer gut ist, wenn man was ausgeben kann, under das kann der kleine von Haus aus ja nicht. Er hat kein Serial-Interface womit ich schön nebenbei debuggen kann…
 
 Debugging ohne Serial
 ---------------------
 
-Ich hatte noch von vor Urzeit manuell eine der Bibliotheken dafür herungeladen. Spannend an dem Board ist, dass es mit einem Two-Wire-Interface angesteuert wird, aber eben nicht über Standard I2C. Es bedarf also zweier Pins, einen für CLK und einen für DIO. womit mal wieder ein paar Schwierigkeiten begannen. Ich habe P3 und P2 ausgewählt, was spontan funktionierte. Da aber P2 später für die I2C-Schnittstelle zum RTC-Board benötigt wird, habe ich das wechseln müssen. Danach funktionierte gar nichts mehr. Nach einigem Experimentieren hat die Kombi P3/P4 funktioniert. Ich konnte später noch lesen, dass das vermutlich mit den weiteren Beschaltungen für die USB-Schnittstelle und die interne LED an P1 zu tun haben könnte. Da sind unerwartete Pull-Ups und ähnliches – ich habe auf jeden Fall nicht alles verstanden aber viel geflucht. Immerhin – an den Ports funktioniert das Display auch prima. Ich habe später noch so meine Probleme mit dem Doppelpunkt im Display gehabt - Spoiler: Es hängt am 8. Bit des 2. Zeichens…
+Ich hatte noch von vor Urzeit manuell eine der Bibliotheken dafür heruntergeladen. Spannend an dem Board ist, dass es mit einem Two-Wire-Interface angesteuert wird, aber eben nicht über Standard I2C. Es bedarf also zweier Pins, einen für CLK und einen für DIO. womit mal wieder ein paar Schwierigkeiten begannen. Ich habe P3 und P2 ausgewählt, was spontan funktionierte. Da aber P2 später für die I2C-Schnittstelle zum RTC-Board benötigt wird, habe ich das wechseln müssen. Danach funktionierte gar nichts mehr. Nach einigem Experimentieren hat die Kombi P3/P4 funktioniert. Ich konnte später noch lesen, dass das vermutlich mit den weiteren Beschaltungen für die USB-Schnittstelle und die interne LED an P1 zu tun haben könnte. Da sind unerwartete Pull-Ups und ähnliches – ich habe auf jeden Fall nicht alles verstanden aber viel geflucht. Immerhin – an den Ports funktioniert das Display auch prima. Ich habe später noch so meine Probleme mit dem Doppelpunkt im Display gehabt - Spoiler: Es hängt am 8. Bit des 2. Zeichens…
 
 Die „Echt-Zeit-Uhr“
 -------------------
 
+<img src="RTC DS3231SN ZS-042" width="50%">
 Nachfolgend habe ich den dann freigewordenen Pins P0 und P2 das RTC-Board per I2C angeschlossen. Dort habe ich mich wegen der Programmgröße dazu entschieden, keine Library hierfür anzuwenden sondern direkt die Lese- und Setzfunktion zu schreiben und im Hauptprogramm abzulegen. Das war auch deswegen gut, weil für den Einsatz auf dem ATtiny die TinyWire-Lib anstelle der Wire-Lib empfohlen wird. Das ist aber nur ein begrenztes Drop-In-Replacement, also müsste eh was ändern, also kopier ich nur das wichtigste mit rüber.
 
 Ein kurzes Auslesen und Zeit darstellen-Progrämmchen zeigt, dass der Parallelbetrieb Display und RTC nun klappt und die Kommunikation zur RTC ebenfalls funktioniert. Damit die Funktion geprüft wird und die RTC (hat schon eine Batterie bekommen) auch die korrekte Zeit liefert, setze ich einmal die Uhrzeit mit festen Werten über ein gut getimtes Einschalten des Digispark. Danach gleich wieder raus damit aus dem Code, es sollte ja nur einmal die Zeit gesetzt werden. (Das RTC-Modul hat übrigens einen Akku vorgesehen (LIR2032) – wenn man es mit einer Batterie betrieben möchte, muss ein Widerstand auf der Rückseite entfernt werden, damit das Modul nicht versucht die Batterie zu laden!)
@@ -82,6 +85,7 @@ Also kurz den Sketch um Kommunikationsfunktionen mit dem EEPROM ergänzt – was
 
 Das nächste Problem wartet auch schon: ich würde gerne zwei Knöpfe nutzen, einen fürs kleine Geschäft (Pee) und einen fürs Große (Poo). 2 Digitale Inputs – hm, ich hab noch P5 (Reset ist ja jetzt weg) und P1 (interne LED). P1 war mir allerdings weiterhin suspekt, daher hab ich überlegt, ob es auch anders geht. Natürlich – ist doch P5 auch als analoger Eingang nutzbar. Wie wäre es, wenn wir mit verschiedenen Widerständen gegen einen Pull-Down arbeiten um mit den beiden Knöpfen verschiedene Spannungen an P5 zu erzeugen. Im Internet (z.B. hier: <https://www.instructables.com/id/How-to-Multiple-Buttons-on-1-Analog-Pin-Arduino-Tu/>) erfahre ich, dass die Idee auch anderen so gut gefallen hat, dass sie die bereits umgesetzt haben.
 
+<img src="Platine Unterseite ohne Baugruppen.jpg" width="50%" alt="Zwei der Widerstände gehen zu den Tastern.">
 Also passend angeschlossen und einen Testsketch aufgesetzt, der „live“ den aktuellen analogen Wert von P5 anzeigt. Damit kann ich dann sauber testen ob meine Idee passt und welche Widerstände ich verwenden sollte. Nach ein wenig Experimentieren habe ich als Pull-Down einen 5K Widerstand verwendet und für die beiden Buttons einen 1K und 2K. Meine Werte hab ich ja ablesen können – sie warten gut auseinanderzuhalten, auch wenn beide Knöpfe zeitgleich gedrückt werden. Einzig gibt es immer wieder eine kleine Ungenauigkeit in der Auslesung, das verursacht leicht schwankende Werte. Tatsächlich kann ich aber für Messwerte x sagen:
 
 -   x&lt;100 → keine Taste
@@ -89,13 +93,16 @@ Also passend angeschlossen und einen Testsketch aufgesetzt, der „live“ den a
 -   300 &lt;= x &lt; 400 → Taste 2
 -   x &gt; 400 → Taste 1 und 2
 
+<img src="Analoge Messwerte mit linker Taste.jpg" width="50%" alt="Hier wird die linke Taste gedrückt.">
 Das kann natürlich bei anderen Beschaltungen, anderen Widerständen usw. anders sein, also selber ausmessen nicht vergessen. Mit dieser Info konnte ich dann Funktionen fürs Erkennen der Knöpfe samt Debouncing bauen.
 
 Und jetzt „Platine frei“
 ------------------------
 
+<img src="Platine Oberseite ohne Baugruppen.jpg" width="50%" alt="Oben war ja schon die Oberseite zu sehen.">
 So, jetzt ist alles an Hardware möglich wie geplant, jetzt kommt Kampfverdrahtung auf der Lochrasterplatine. Ich hätte es gerne funktionierend, Oberseite einigermaßen klar, am Rand Freiflächen zur Positionierung und zum Festhalten des Boards am Gehäuse und natürlich eine gewisse Symmetrie vorne. Bei den Tasten ist das nicht ganz so wichtig, da kann man im Gehäusedesign noch was machen, aber das Display sollte mittig sitzen. Entgegen meiner üblichen Aufbauten sollte diesmal auch kein Teil der Devboards fest verlötet werden, sondern alles steckbar bleiben. Arretierungen müssen also im Gehäusedesign vorgesehen werden. Ich bin dann beim im Foto sichtbaren Design gelandet. Verdrahtung ist sicher optimierbar, ein eigenes PCB kann ich nicht, schöne Leitungsführung kann ich leider auch nicht. Aber funktionierend – das kann ich.
 
+<img src="Platine mit Baugruppen Seitenansicht.jpg" width="50%">
 Allte Tests nach dem Löten und Stecken sind erfolgreich. Das beruhigt ungemein – weiß jeder der schon mal bei einem „fertigen“ Design Fehler festgestellt hat und dann alles umlöten und vor allem debuggen muss. Jetzt muss also noch die Software fertig werden und das Gehäuse designed und gedruckt werden.
 
 Ohoh, muss das so? (DigiSpark gebrickt...)
@@ -103,14 +110,19 @@ Ohoh, muss das so? (DigiSpark gebrickt...)
 
 Beim weiteren Entwickeln trat auf einmal ein seltsames Problem auf: Ich habe den Digispark ja immer im Wechsel in meinem gelöteten Board und am Rechner stecken. Mit dem Uhren-Testprogramm stellte ich auf einmal fest, dass die Uhrzeit sofort nach dem Einstecken aktualisiert wird. Da sollte es doch die 5 Sekunden-Pause geben? Mist, tut sie aber nicht mehr. Natürlich wird der Digispark nun am Rechner auch nicht mehr erkannt, weil er offensichtlich den Boorloader entweder überspringt oder gar nicht mehr kennt. Grrrr. Ich wollte mir das Thema Hochvoltprogrammierung (hier eine verständliche Anleitung was man tun muss: <https://www.instructables.com/id/Simple-and-cheap-Fuse-Doctor-for-Attiny/>) doch erst viel später antun. Mal sehen, ob ich was mit dem ArduinoISP lösen kann…
 
+<img src="Anschluss DigiSpark.jpg" width="50%" alt="Hier muss der kleine Kerl rein.">
 Erstmal aber wird der nächste Digispark vorbereitet, sprich erstmal die Stiftleisten angelötet. Es war mir beim ersten mal nicht sofort aufgefallen, jetzt aber fühlt sich das Anlöten irgendwie seltsam an. Die Lötstellen sehen auch anders aus? Ahh, richtig, da das Digispark Board ja den USB-Stecker nachahmt, ist es dicker als die üblichen Boards, daher schaut die Stiftleiste auf der Lötseite viel weniger aus dem Board raus.
 
 Erstmal ein Gehäuse
 -------------------
 
+<img src="Gehäuseoberteil leer.jpg" width="50%" alt="Oberteil mit Verlängerungen auf die Taster">
 Aus Frust baue ich erstmal das Gehäuse. Über TinkerCAD wird munter gewerkelt und mit der Schieblehre hantiert bis ein Oberteil existiert, welches eine geeignete Größe hat, eine passende Aussparung für das Display und Gehäuselaschen mit Druckpunktverlängerung zum Bedienen der Knöpfe über das Gehäuse. Mangels Beherschung von Klick-Verschluss-Designs bastle ich wieder was zum Zusammenschrauben. Das hält auf jeden Fall, nimmt aber leider immer einigen Raum ein. Diesmal sind es 9mm Kästen mit 2,8mm Röhre als Schraubenführung, damit später 3,5x30er Schrauben alles zusammenhalten. Das Board halte ich über die vorgesehene „Quiet-Zone“ an den Rändern, also dort wo kein Bauteil sitzen darf. Da bietet das Gehäuse nun einen Raum, der ein wenig (4mm) schmaler ist, als die Platine. Dort ist der Rand des Gehäuses um diese 2mm je Seite stärker, ich mache aber noch auf Platinenbreite eine 1,6mm tiefe und 40,4mm lange Aussparung je Seite rein, dann sitzt das Board sauber in dieser Aussparung fest und wird dann später vom Rückenteil des Gehäuses in diese Aussparung gedrückt bzw. dort gehalten.
 
+<img src="Gehäuseunterteil innen.jpg" width="50%">
 Für den Rand wo Ober- und Unterteil aufsetzen gönne ich mir eine Zierleiste von 1mm Überstand auf dem Oberteil, die ich dann auf dem Unterteil wegnehmen muss. Dadurch kann man dann nicht durch den Spalt schauen und auch Flüssigkeiten tropfen nicht direkt durch. Das fertige Teil habe ich freigegeben (<https://www.tinkercad.com/things/6aOmo4KOrsl>). Bis auf die Stromzuführung ist da schon alles drin, inklusive einer rückseitigen Aufhängung für Schrauben. Jetzt aber wieder zurück zu meinem Digispark.
+<img src="Gehäuseunterteil von hinten.jpg" width="50%"><img src="Gehäuseteile Kontaktnaht.jpg" width="50%">
+
 
 Andere Firmware?
 ----------------
